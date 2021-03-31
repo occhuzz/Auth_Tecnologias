@@ -1,12 +1,10 @@
 using { miEmpresa as my } from '../db/schema';
 
+
 service ApiService @(requires:'authenticated-user')
 {
     entity Proyectos as projection on my.Proyectos;
-    entity Tecnologias as select from my.Tecnologias
-    {
-        *,
-    } where dificultad <> 'null';
+    entity Tecnologias as projection on my.Tecnologias;
 
     entity Listado_Tecnologias as select from my.Listado_Tecnologias
     {
@@ -22,17 +20,16 @@ service ApiService @(requires:'authenticated-user')
         proyecto.cliente,
         sum(dificultad) as dificultad_total : Integer,
         sum(precio_subtotal) as precio_total : Integer,
-        sum(horas_subtotal) as horas_total : Integer,
-    };
+        sum(horas_subtotal) as horas_total : Integer
+    } group by proyecto.cliente;
+
+    action EliminarProyecto(proyecto_ID : Proyectos : ID) returns String;
 }
 
 service GenService @(_requires:'authenticated-user')
 {
     entity Proyectos as projection on my.Proyectos;
-    entity Tecnologias as select from my.Tecnologias
-    {
-        *,
-    } where dificultad <> 'null';
+    entity Tecnologias as projection on my.Tecnologias;
 
     entity Listado_Tecnologias as select from my.Listado_Tecnologias
     {
@@ -48,17 +45,16 @@ service GenService @(_requires:'authenticated-user')
         proyecto.cliente,
         sum(dificultad) as dificultad_total : Integer,
         sum(precio_subtotal) as precio_total : Integer,
-        sum(horas_subtotal) as horas_total : Integer,
-    };
+        sum(horas_subtotal) as horas_total : Integer
+    } group by proyecto.cliente;
+
+    action EliminarProyecto(proyecto_ID : Proyectos : ID) returns String;
 }
 
 service AdminService @(requires:'ScopeTech')
 {
     entity Proyectos as projection on my.Proyectos;
-    entity Tecnologias as select from my.Tecnologias
-    {
-        *,
-    } where dificultad <> 'null';
+    entity Tecnologias as projection on my.Tecnologias;
 
     entity Listado_Tecnologias as select from my.Listado_Tecnologias
     {
@@ -74,6 +70,8 @@ service AdminService @(requires:'ScopeTech')
         proyecto.cliente,
         sum(dificultad) as dificultad_total : Integer,
         sum(precio_subtotal) as precio_total : Integer,
-        sum(horas_subtotal) as horas_total : Integer,
-    };
+        sum(horas_subtotal) as horas_total : Integer
+    } group by proyecto.cliente;
+
+    action EliminarProyecto(proyecto_ID : Proyectos : ID) returns String;
 }

@@ -1,18 +1,18 @@
 const cds = require("@sap/cds");
-const { Tecnologias, Listado_Tecnologias } = cds.entities;
+const { Tecnologias, Listado_Tecnologias, Proyectos } = cds.entities;
+
+/*
+Ingresar en la URL los ID de la tecnologia [0-9], las dificultades [1,3,5]. Ejemplo:
+'Proyectos?Tecnologias=1234,3135':
+ID Tecnologia: 1, Dificultad 3
+ID Tecnologia: 2, Dificultad 1
+ID Tecnologia: 3, Dificultad 3
+ID Tecnologia: 4, Dificultad 5
+*/
 
 module.exports = cds.service.impl(async (srv)=>
 {
-    srv.after('CREATE','Proyectos', async (data,req) =>
-    
-    /*Ingresar en la URL los ID de la tecnologia [0-9], las dificultades [1,3,5]. Ejemplo:
-    'Proyectos?Tecnologias=1234,3135':
-    ID Tecnologia: 1, Dificultad 3
-    ID Tecnologia: 2, Dificultad 1
-    ID Tecnologia: 3, Dificultad 3
-    ID Tecnologia: 4, Dificultad 5
-    */
-    
+    srv.after('CREATE',Proyectos, async (data,req) =>
     {
         const { ID } = data;
 
@@ -25,7 +25,7 @@ module.exports = cds.service.impl(async (srv)=>
         {
             for (let i = 0; i < splitURL[0].length; i++) //For por cada tecnologia
             {
-                valor = splitURL[1][i]; //Se guarda el valor de la dificultad
+                valor = parseInt(splitURL[1][i]); //Se guarda el valor de la dificultad
                 if(valor == 1 || valor == 3 || valor == 5) //Comprobar dificultad correcta (1,3,5)
                 {
                     await cds.run(UPDATE(Tecnologias).set({dificultad: valor}).where({ ID : splitURL[0][i]}));//Update de Dificultad a la Tecnologia
@@ -48,4 +48,22 @@ module.exports = cds.service.impl(async (srv)=>
             return "Ocurrió un error al asignar tecnologias a un Proyecto";
         };
     });
+
+    //--------------------------------------------------------------------------
+    //Eliminar Proyecto
+    srv.on('EliminarProyecto', async(req) =>
+    {
+        const { proyecto_ID }  = req.data;
+
+        try
+        {
+            await cds.run(DELETE.from(Proyectos).where({ID : proyecto_ID}));
+            return "Proyecto eliminado correctamente";
+        }
+        catch(err)
+        {
+            console.log(err);
+            return "Ocurrió un error al eliminar un Proyecto";
+        }
+    })
 });
